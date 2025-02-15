@@ -6,20 +6,20 @@ This repository contains projects developed during the **Master's in Big Data & 
 
 ## 📂 **Repository Structure**  
 
-📁 `AEM` - Statistical Learning and Modeling  
-📁 `APCD` - Architecture and Paradigms for Data Science  
-📁 `ML_I` - Machine Learning I  
-📁 `ICSR` - Collective Intelligence and Recommender Systems  
+📁 `SLM` - Statistical Learning and Modeling  
+📁 `APDS` - Architecture and Paradigms for Data Science  
+📁 `ML I` - Machine Learning I  
+📁 `CIRS` - Collective Intelligence and Recommender Systems  
 📁 `DSBI` - Data Science and Business Intelligence  
-📁 `ML_II` - Machine Learning II  
+📁 `ML II` - Machine Learning II  
 📁 `APBD` - Architectures and Paradigms for Big Data  
-📁 `VISDAT` - Data Visualization  
-📁 `MDTE` - Models for Temporal and Spatial Data  
-📁 `VISINF` - Information Visualization  
+📁 `DATVIS` - Data Visualization  
+📁 `MTSD` - Models for Temporal and Spatial Data  
+📁 `INFVIS` - Information Visualization  
 📁 `DL` - Deep Learning  
 
 Each folder contains:  
-✅ Source code (`.py`, `.ipynb`, etc.)  
+✅ Source code (`.py`, `.ipynb`, .r, .rmd, etc.)  
 ✅ Documentation and notes in `README.md`  
 ✅ Sample datasets (if applicable)  
 
