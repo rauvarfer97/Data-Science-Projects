@@ -6,17 +6,17 @@ This repository contains projects developed during the **Master's in Big Data & 
 
 ## 📂 **Repository Structure**  
 
-📁 APBD - Architectures and Paradigms for Big Data
-📁 APDS - Architecture and Paradigms for Data Science
-📁 CIRS - Collective Intelligence and Recommender Systems
-📁 DATVIS - Data Visualization
-📁 DL - Deep Learning
-📁 DSBI - Data Science and Business Intelligence
-📁 INFVIS - Information Visualization
-📁 ML I - Machine Learning I
-📁 ML II - Machine Learning II
-📁 MTSD - Models for Temporal and Spatial Data
-📁 SLM - Statistical Learning and Modeling
+- 📁 APBD - Architectures and Paradigms for Big Data
+- 📁 APDS - Architecture and Paradigms for Data Science
+- 📁 CIRS - Collective Intelligence and Recommender Systems
+- 📁 DATVIS - Data Visualization
+- 📁 DL - Deep Learning
+- 📁 DSBI - Data Science and Business Intelligence
+- 📁 INFVIS - Information Visualization
+- 📁 ML I - Machine Learning I
+- 📁 ML II - Machine Learning II
+- 📁 MTSD - Models for Temporal and Spatial Data
+- 📁 SLM - Statistical Learning and Modeling
 
 Each folder contains:  
 ✅ Source code (`.py`, `.ipynb`, .r, .rmd, etc.)  
