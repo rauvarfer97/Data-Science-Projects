@@ -1,52 +1,52 @@
-# 📊 Data Science Projects - Master's in Big Data & Machine Learning  
+# 📊 Data Science Projects  
 
-Este repositorio contiene los proyectos desarrollados durante el Máster en **Big Data & Machine Learning** en la Universidad de Sevilla. Cada carpeta corresponde a una asignatura y contiene notebooks, código y documentación relevante.  
+This repository contains projects developed during the **Master's in Big Data & Machine Learning** at the University of Seville. Each folder corresponds to a course and includes notebooks, code, and relevant documentation.  
 
 ---
 
-## 📂 **Estructura del Repositorio**  
+## 📂 **Repository Structure**  
 
-📁 `AEM` - Aprendizaje Estadístico y Modelización  
-📁 `APCD` - Arquitectura y Paradigmas para la Ciencia de Datos  
+📁 `AEM` - Statistical Learning and Modeling  
+📁 `APCD` - Architecture and Paradigms for Data Science  
 📁 `ML_I` - Machine Learning I  
-📁 `ICSR` - Inteligencia Colectiva y Sistemas de Recomendación  
-📁 `DSBI` - Data Science y Business Intelligence  
+📁 `ICSR` - Collective Intelligence and Recommender Systems  
+📁 `DSBI` - Data Science and Business Intelligence  
 📁 `ML_II` - Machine Learning II  
-📁 `APBD` - Arquitecturas y Paradigmas para Big Data  
-📁 `VISDAT` - Visualización de Datos  
-📁 `MDTE` - Modelos para Datos Temporales y Espaciales  
-📁 `VISINF` - Visualización de la Información  
+📁 `APBD` - Architectures and Paradigms for Big Data  
+📁 `VISDAT` - Data Visualization  
+📁 `MDTE` - Models for Temporal and Spatial Data  
+📁 `VISINF` - Information Visualization  
 📁 `DL` - Deep Learning  
 
-Cada carpeta incluye:  
-✅ Código fuente (`.py`, `.ipynb`, etc.)  
-✅ Documentación y notas en `README.md`  
-✅ Datos de ejemplo (si aplica)  
+Each folder contains:  
+✅ Source code (`.py`, `.ipynb`, etc.)  
+✅ Documentation and notes in `README.md`  
+✅ Sample datasets (if applicable)  
 
 ---
 
-## 🚀 **Tecnologías Utilizadas**  
-- **Lenguajes**: Python, R, SQL  
-- **Librerías**: NumPy, Pandas, Scikit-learn, TensorFlow, PyTorch, Matplotlib, Seaborn  
-- **Bases de datos**: MySQL, MongoDB  
-- **Herramientas**: Jupyter Notebooks, Power BI, Shiny  
+## 🚀 **Technologies Used**  
+- **Languages**: Python, R, SQL  
+- **Libraries**: NumPy, Pandas, Scikit-learn, TensorFlow, PyTorch, Matplotlib, Seaborn  
+- **Databases**: MySQL, MongoDB  
+- **Tools**: Jupyter Notebooks, Power BI, Shiny  
 
 ---
 
-## 📖 **Descripción de Proyectos Destacados**  
-🔹 **Sistema de Recomendación**: Algoritmos basados en filtrado colaborativo y medidas de similitud.  
-🔹 **Modelos de Machine Learning**: Clasificación y regresión con modelos supervisados y no supervisados.  
-🔹 **Big Data & ETL Pipelines**: Procesamiento masivo de datos con Spark y herramientas de almacenamiento en la nube.  
-🔹 **Visualización Avanzada**: Creación de dashboards interactivos para análisis de datos.  
+## 📖 **Highlighted Projects**  
+🔹 **Recommender System**: Collaborative filtering algorithms and similarity measures.  
+🔹 **Machine Learning Models**: Supervised and unsupervised classification and regression.  
+🔹 **Big Data & ETL Pipelines**: Large-scale data processing with Spark and cloud storage.  
+🔹 **Advanced Visualization**: Interactive dashboards for data analysis.  
 
 ---
 
-## 🤝 **Contribuciones y Contacto**  
-Si tienes alguna sugerencia o quieres colaborar, ¡estaré encantado de recibir feedback!  
+## 🤝 **Contributions & Contact**  
+Feel free to provide feedback or contribute to this repository!  
 
-📩 **Contacto**: [raulvarela97@gmail.com](mailto:raulvarela97@gmail.com)  
+📩 **Contact**: [raulvarela97@gmail.com](mailto:raulvarela97@gmail.com)  
 💼 **LinkedIn**: [Raúl Varela Ferrando](https://www.linkedin.com/in/ra%C3%BAl-varela-ferrando-82331421b/)  
 
 ---
 
-### ⭐ **Si este repositorio te resulta útil, no olvides darle una estrella!** ⭐
+### ⭐ **If you find this repository useful, don’t forget to give it a star!** ⭐
