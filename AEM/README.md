@@ -50,7 +50,7 @@ install.packages(c("kknn", "caret", "rknn", "ggplot2"))
 2. Follow the steps in the Sknn_Varela_Ferrando.rmd file to process the data and fit the models.
 3. The analysis results can be viewed in the Sknn_Varela_Ferrando.pdf file, which includes formatted tables and figures.
 
-Feel free to contact Raúl Varela Ferrando for further questions or clarifications regarding the project.
+**Feel free to contact Raúl Varela Ferrando for further questions or clarifications regarding the project.**
 
 
 
