@@ -1,0 +1,173 @@
+---
+title: "Spatial Series Project"
+author: "Raúl Varela Ferrando"
+always_allow_html: true
+output: pdf_document
+---
+
+<div class=text-justify>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r paquetes, include=FALSE}
+library(raster)         
+library(rgeos)
+library(lattice)        
+library(RColorBrewer) 
+library(latticeExtra) 
+library(sp)
+library(sf)
+library(spdep)
+library(spatialreg)
+
+```
+
+
+## Resumen
+
+<div class=text-justify>
+
+In this work, we will address the treatment of spatial series in the **RStudio** environment. We will use the dataset **genera_esp.r** , from which we will create different models and evaluate the performance of each of them, while also presenting the various conclusions we obtain.
+
+----------------------------------------
+
+We start by reading the data, observing what it contains and its properties.
+
+```{r 1}
+DNI= 17350 
+source("genera_esp.r") 
+datos=genespdat(DNI) 
+dim(datos) 
+names(datos) 
+summary(datos)
+class(datos)
+```
+
+As detailed in the document containing the job statement, we have a dataset that contains a time series of 255 observations and 6 variables. The variables **X** and **Y** represent the east-west and north-south coordinates, respectively. The variables **vxi** represent the explanatory variables from which we want to study the target variable **vobj**.
+
+First, we are asked to analyze spatial dependence by defining a neighborhood structure with a maximum neighbor distance of 50. First, we create our *SpatialPoints* object, which we will use to define the nearest neighbor structure with the help of the *dnearneigh()* function from the *spdep* library.
+
+```{r 2}
+datos = SpatialPointsDataFrame(datos[,1:2],datos)
+class(datos)
+```
+
+Once we have our object created, we proceed to define the structure.
+
+```{r 3}
+datos.nb <- dnearneigh(datos, d1 = 0, d2 = 50)
+summary(datos.nb)
+
+```
+
+The next step would be the definition of our weight matrix **W**, which we will obtain from the *nb2listw()* function. 
+
+```{r 4}
+datos.lw <- nb2listw(datos.nb, style = "W", zero.policy = TRUE)
+names(datos.lw)
+
+plot(datos,   pch=16,col=3)
+plot(datos.nb, 
+     coordinates(datos), col='red', lwd=1, add=TRUE)
+```
+
+Within the created object, we can consult the weights assigned to the different neighbors in the *weights* element, which are assigned the same value for all neighbors of the same element by default. It can be observed that the number of neighbors varies between 4 and 10, depending on the chosen observation. Next, we proceed to calculate the Moran's index of the target variable using the *moran.mc()* function from the *spdep* library.
+
+```{r 5}
+moran.mc(datos$vobj, datos.lw, 999,zero.policy=TRUE)
+```
+
+We obtain a value of $I=0.98$, which is very close to 1, so we can accept the existence of spatial correlation. This dependence may vary with the neighborhood size; to find the maximum distance that maximizes this dependence within the interval specified in the statement, we use the following loop:
+
+```{r 6}
+IM=c() 
+secuencia=seq(25, 100,1)
+for (dv in secuencia) {
+  nuevo.nb <- dnearneigh(datos, d1 = 0, d2 = dv)
+  nuevo.lw <- nb2listw(datos.nb, style = "W", zero.policy = TRUE)
+  nuevomoran <- moran.mc(datos$vobj, nuevo.lw, nsim = 999,
+                         zero.policy = TRUE)
+  IM<- c(IM, nuevomoran$statistic)
+}
+
+IM <- data.frame(I_Moran = IM, distancia = secuencia)
+
+plot(IM$distancia,IM$I_Moran,type="h",col=4,lwd=2,
+     xlab="Maximum neighborhood distance",ylab="Moran's Index"
+)
+grid()
+```
+
+As can be seen in the graph, the Moran's index remains constant even if we change this distance.
+```{r 7}
+max(IM$I_Moran)
+```
+
+The same value was obtained for the case of a maximum distance of 50, so we consider that this correlation does not depend on the neighborhood size. Next, we will obtain the different spatial models (SAR and SEM) and analyze which one provides the best fit. Starting with the SAR model:
+
+```{r 8}
+m1s = lagsarlm(vobj ~ vx1 + vx2 + vx3, data=datos, datos.lw, tol.solve=1.0e-30) 
+summary(m1s)
+```
+
+We can observe that all variables are significant and that the model improves upon the linear regression model. However, by examining the result of the LM test, we confirm that we cannot rule out the existence of residual correlation.
+
+```{r 9}
+datos$residuals = residuals(m1s)
+moran.mc(datos$residuals, datos.lw, 999)
+```
+
+With this, we verify that spatial autocorrelation still exists in the model residuals.
+
+Finally, we proceed to obtain the SEM model from our data.
+
+```{r 10}
+m1e = errorsarlm(vobj ~ vx1 + vx2 + vx3, data=datos, datos.lw, tol.solve=1.0e-30)
+summary(m1e)
+AIC(m1e)
+```
+
+Again, we obtain that the variables are significant since the associated p-values are very small. We also have an approximation of the parameter $\lambda=0.998$, in addition to the fact that the model improves upon the standard linear regression model and, in turn, the SAR model. We recalculate the Moran's index.
+
+```{r 12}
+datos$residuals2 <- residuals(m1e)
+moran.mc(datos$residuals2, datos.lw, 999)
+```
+
+Once again, we find that we cannot rule out autocorrelation in the model residuals. To compare the models, we will plot the residuals and their fitted values.
+
+```{r 14}
+plot(m1e$residuals,m1s$residuals,pch=15,col=2, xlab='Residuals of the SEM model',
+ylab='Residuals of the SAR model', 
+main='Comparison of the model residuals'
+)
+abline(a=0,b=1,col=4,lwd=3)
+grid()
+
+par(mfrow=c(2,1))
+hist(m1e$residuals,col=3, xlab='Residuals of the SEM model',
+     ylab='Frequency')
+hist(m1s$residuals,col=2, xlab='Residuals of the SAR model',
+     ylab='Frequency')
+```
+
+
+```{r 15}
+plot(m1e$fitted.values, m1s$fitted.values, pch=15, col=2, 
+     xlab='Fitted values of the SEM model',
+     ylab='Fitted values of the SAR model', 
+     main='Comparison of the fitted values of the models')
+abline(a=0,b=1,col=4,lwd=3)
+grid()
+```
+
+Accessing the AIC values for each model:
+
+```{r 16}
+cat('We obtain an AIC of ', AIC(m1s), 'for the SAR model, and an AIC of ', 
+    AIC(m1e), 'for the SEM model.')
+```
+
+Therefore, we can conclude that the SEM model provides better results.
