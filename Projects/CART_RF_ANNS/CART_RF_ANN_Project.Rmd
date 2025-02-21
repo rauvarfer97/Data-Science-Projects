@@ -1,0 +1,514 @@
+---
+title: "Machine Learning II Project"
+author: "Raúl Varela Ferrando"
+always_allow_html: true
+output: pdf_document
+---
+
+<div class=text-justify>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r paquetes, include=FALSE}
+library(rpart)
+library(readxl)
+library(MASS)
+library(foreign)
+library(tidyverse)
+library(DMwR2)
+library(randomForest)
+library(caret)
+library(corrplot)
+library(GA)
+library(performanceEstimation)
+library(ROSE)
+library(nnet)
+```
+
+
+## Resumen
+
+<div class=text-justify>
+
+In this work we will face a classification problem from different perspectives in the *RStudio* environment using everything we have learned throughout the **MLI** and **MLII** courses. We will use a dataset provided by the professor of the course from which we will create different models and evaluate the performance of each of them, exposing the different conclusions we obtain.
+
+----------------------------------------
+
+We start by reading the data, looking at what it contains and its properties.
+
+```{r 1}
+data = read_excel('CLIMBING.xlsx')
+summary(data)
+```
+
+We have a climbing data dataset with 31 variables, of which 28 are numerical and with different scales, so we will need to typify them later. The variable *ID* is simply for identification purposes, so it will not be important, and the variable *N SEQ* is 7 for all cases (it represents the number of holds in each route), so it does not provide information for a classification problem. The response variable in our case will be *GRADE*, which is the variable representing the difficulty of the track, which can take 15 different values. The variables *i_X*, *i_Y*, or *i_Z* represent the coordinates of the different dams and, finally, the variables *i_PRESS*, the difficulty of each one.
+
+Next we will partition the training and test sets using the seed (1234). In this case we have only obtained the indexes of the training set since it is enough for us as we will demonstrate throughout the document. It is also convenient to comment that to avoid problems when creating the models we are going to change the names of the variables.
+
+```{r 2}
+set.seed(1234)
+n = nrow(data)
+nent = ceiling(0.75*n)
+ntest = n-nent
+indin = 1:n
+indient = sort(sample(indin,nent))
+
+colnames(data) = c('id', 'nseq', 'grado', 'X1', 'Y1', 'Z1', 'PRESA1', 'X2', 'Y2',
+                   'Z2', 'PRESA2', 'X3', 'Y3', 'Z3', 'PRESA3', 'X4', 'Y4', 'Z4', 
+                   'PRESA4', 'X5', 'Y5', 'Z5', 'PRESA5', 'X6', 'Y6', 'Z6', 'PRESA6',
+                   'X7', 'Y7', 'Z7', 'PRESA7')
+```
+
+Once done, we are asked to use the *Classification and Regression Trees* (CART) and *Random Forest* (RF) algorithms on our dataset and try to obtain the best version of each of them. Starting with CART we obtain the following results.
+
+```{r 3}
+set.seed(1234)
+data.rpart <- rpart(grado ~ . - id - nseq, data=data, subset = indient, 
+                    method="class")
+
+plot(data.rpart,main="CART CLIMBING data.",
+     uniform=TRUE)
+text(data.rpart,col="blue",cex=0.4)
+```
+Here we can graphically observe our model. In this case we have created a tree with all the default parameters, so we may not get the best results. These are shown in the following *chunk*.
+
+```{r 4}
+predictest<- predict(data.rpart,data[-indient,], type="class")
+ct<-table(data[-indient,]$grado,predictest)
+
+cat('The hit rate per group in the overall test set: \n',
+    100*diag(prop.table(ct, 1)),'\n')
+
+cat('The overall hit rate on the test set: ',
+    100*sum(diag(prop.table(ct))),'\n')
+```
+
+For some classes we have a higher hit rate than for others, for example for roads whose difficulty is *5A* we obtain a 66.67% hit rate, although if we look at the confusion matrix, we only have three cases in the test set, of which two are correct, so I do not consider it to be very reliable. In general we get a rather low hit rate so our model classifies very poorly the degree of difficulty of the road. We will proceed to change the parameters of the *rpart()* function to see if we can improve the performance of our model. Among them we can vary the parameter *cp*, which represents the minimum variation of the impurity necessary to continue splitting the branches of the tree, or the parameter *split* to change the evaluation method which by default is the Gini index.
+
+```{r 5}
+set.seed(1234)
+data.rpart2 <- rpart(grado ~ . - id - nseq, data=data, subset = indient, 
+method="class", cp=0.01, parms=list(split="information"))
+```
+
+After testing several values of the parameter *cp*, we have chosen 0.01 because if it is lower, we get worse results, and if it is higher, it does not improve the performance. We have not included the loss matrix (*loss*) since we have 15 classes, so we would get a 15x15 matrix, and we have left the *prior* parameter by default.
+
+```{r 6}
+predictest<- predict(data.rpart2,data[-indient,], type="class")
+ct<-table(data[-indient,]$grado,predictest)
+
+cat('The hit rate per group in the overall test set: \n',
+    100*diag(prop.table(ct, 1)),'\n')
+
+cat('The overall hit rate on the test set: ',
+    100*sum(diag(prop.table(ct))),'\n')
+```
+
+We get better results than in the previous model, but it is still a lousy rating, so we are going to see if we can improve it.
+
+```{r 7}
+plot(data.rpart2,main="CART datos CLIMBING. CP=0.01",
+     uniform=TRUE)
+text(data.rpart2,col="blue",cex=0.4)
+printcp(data.rpart2,digits=3)
+plotcp(data.rpart2)
+```
+
+By choosing such a small value for the minimum impurity decrease for each partition of the tree (parameter *cp*), we are creating a very large tree, so we will look for the simplest tree with similar results to save computational power. We will use the *DMwR* library, specifically the *rt.prune()* function, which performs this process by applying the 1-ES rule.
+
+```{r 8}
+arbolrec=rt.prune(data.rpart2)
+arbolrec
+
+printcp(arbolrec)
+printcp(data.rpart2)
+```
+
+```{r 9}
+predictest<- predict(arbolrec,data[-indient,], type="class")
+ct<-table(data[-indient,]$grado,predictest)
+
+cat('The hit rate per group in the overall test set: \n',
+    100*diag(prop.table(ct, 1)),'\n')
+
+cat('The overall hit rate on the test set: ',
+    100*sum(diag(prop.table(ct))),'\n')
+```
+
+As we can see the performance is even worse than in the previous one, so we will try to use another algorithm to classify our data, such as RF. For this case it is necessary that the response variable is of type factor and that the numerical variables are typed, so we are going to reread the data.
+
+```{r 10, results=FALSE}
+data = read_excel('CLIMBING.xlsx')
+data$GRADO=as.factor(data$GRADO)
+
+# We typify
+x=data[,c(-1,-2,-3)]
+medias= apply(x,2,mean)
+dt= apply(x,2,sd)
+zent= scale(x,medias,dt)
+apply(zent,2,mean)
+apply(zent,2,sd)
+
+data0=data.frame(zent)
+data[,c(-1,-2,-3)]=data0
+colnames(data) = c('id', 'nseq', 'grado', 'X1', 'Y1', 'Z1', 'PRESA1', 'X2', 'Y2', 'Z2', 'PRESA2',
+                   'X3', 'Y3', 'Z3', 'PRESA3', 'X4', 'Y4', 'Z4', 'PRESA4', 
+                   'X5', 'Y5', 'Z5', 'PRESA5', 'X6', 'Y6', 'Z6', 'PRESA6',
+                   'X7', 'Y7', 'Z7', 'PRESA7')
+
+```
+
+Once we have prepared the data, we move on to the creation of the model with the *randomForest* library.
+
+```{r 11, results='hide'}
+set.seed(1234)
+RF<- randomForest(grado ~ . - id - nseq, data=data, 
+                  subset=indient,
+                  importance=TRUE,do.trace=TRUE,ntree=1000)
+RF
+```
+
+```{r 12, collapse=TRUE}
+plot(RF)
+legend("topright",col=1:3,lty=1:3,
+       legend=c("OOB",levels(data$grado)))
+grid()
+varImpPlot(RF)
+
+predictest<- predict(RF,newdata=data[-indient,], 
+                     type="response")
+ct<-table(data[-indient,]$grado,predictest)
+ct
+
+100*diag(prop.table(ct, 1))
+
+100*sum(diag(prop.table(ct)))
+```
+
+After varying the parameters we came to the conclusion that if we double the number of trees we can minimally improve the performance of our model, and from this point on, increasing this parameter does not get great results compared to the computation time it takes. As can be seen in the performance by groups, most classes are not predicted correctly, reaching a rather low overall hit rate, so this model does not classify the data correctly either.
+
+Next we will create an artificial neural network (ANN) to see if it classifies the different observations correctly. In this case we will use the *caret* library to optimize its parameters within the specified ranges. 
+
+```{r 13, results='hide',warning=FALSE}
+set.seed(1234)
+modeloRNA = train(grado ~ . - id - nseq,data=data,subset=indient,
+                 method = "nnet",linout=TRUE, 
+                 trControl = trainControl(method = "cv"), 
+                 tuneGrid = expand.grid(size=5:8,
+                                        decay=c(0.01,0.05,0.1)) )
+```
+
+It is convenient to comment that we have not used the argument *preProcess* to typify the variables since we have already done it manually. This model returns a warning in which it says that we do not have any case for the variable 8A+, doing a *summary()* in the response variable we can see the amount of cases for each class.
+
+```{r 14}
+summary(data$grado)
+```
+
+As can be seen, there are certain classes for which we have very few cases, so our algorithms may not classify them well due to lack of data. Specifically for the last two classes, 8A+ and 8A, we have one and four cases respectively, and furthermore, the classes in which we have obtained the best performances previously are coincidentally the ones with the most cases, so the problem may go this way, although we will choose not to modify the dataset.
+
+```{r 15}
+summary(modeloRNA)
+plot(modeloRNA)
+modeloRNA
+```
+
+According to the accuracy criterion (*accuracy*) we obtain a model with 28 inputs, which coincides with the number of explanatory variables we have, 5 neurons in the hidden layer, 15 neurons in the output layer, which coincides with the number of classes we have, and a value for the parameter *decay* of 0.05, which represents the decay rate in the gradient method. As activation function we have used *softmax* because we are in a multiclass classification problem, which are also mutually exclusive.
+
+As can be seen in the graph, the maximum is reached for this combination of parameters, so it will be the best model, which we can access as follows.
+
+```{r 16}
+modeloRNA$finalModel
+summary(modeloRNA$finalModel)
+coef(modeloRNA$finalModel)
+```
+To evaluate the performance of our model we will create the confusion matrix and obtain the hit rate, as we have done before, only in this case we will also evaluate it on the training set.
+
+```{r 17}
+pred_ent=predict(modeloRNA,data[indient,])
+pred_test=predict(modeloRNA,newdata=data[-indient,])
+
+confuent<-table(data[indient,]$grado, pred_ent)    
+print('Training:')
+confuent
+confutest<-table(data[-indient,]$grado,pred_test)
+print("Test:")
+confutest
+
+cat("Empirical hit rate = ",100*sum(diag(confuent))/nent,"\n")
+
+cat("Test hit rate = ",100*sum(diag(confutest))/ntest,"\n")
+```
+
+As we can see, the hit rate is still very bad in the test set, and we do not obtain great results in the training set either. Once we have evaluated all the models proposed in the statement of work, we conclude that the one that gives us the best result is *Random Forest*.
+
+Next, the statement suggests that we study the correlation between the explanatory variables and perform a principal component analysis (PCA). As we have seen in theory, this analysis seeks to reduce the dimensionality of our dataset by creating new variables, which are linear combinations of the existing explanatory variables, without losing the information contained in our data. 
+
+In the following *chunk* we can observe the correlation matrix of the explanatory variables, whose determinant will give us an idea of whether this correlation exists or not.
+
+```{r 18}
+R = cor(data[,c(-1,-2,-3)])
+round(R,2)
+det(R) 
+```
+
+By analyzing the matrix we can already have an idea that this correlation exists, since some components have sufficiently high values. Even so, by obtaining the determinant, which is very close to zero, we confirm this correlation. We can also make a graphical representation of this correlation matrix.
+
+```{r 19}
+corrplot(R,method="ellipse")
+```
+
+With the results obtained, we are ready to perform the PCA with the command *princomp()*, taking into account that we must do it only with the explanatory variables that we will use in the model.
+
+```{r 20}
+acp = princomp(data[,c(-1,-2,-3)], cor = TRUE)
+summary(acp)
+```
+
+Through the *summary()* we can study the properties of the object obtained. In the first row we can see reflected the standard deviation of each of the components, which are decreasing since the first components are the ones that contain more information, while the last ones are the ones that contain less. In the second row we can see the proportion of the variance represented by each component and, finally, the third row represents the proportion of the total accumulated variance. It is convenient to point out that not wanting to lose too much information, we should not reduce the dimensionality too much, but neither would it be useful to keep all the components, since precisely what we are looking for is to reduce the number of explanatory variables, so we need to reach a balance. 
+
+To better visualize the PCA we are going to create a table called summary that contains the same information as the *summary()* but more ordered.
+
+```{r 21}
+resume<- matrix(NA,nrow=length(acp$sdev),ncol=3)
+resume[,1] =  acp$sdev^2
+resume[,2] = 100*resume[,1]/sum(resume[,1])
+resume[,3] = cumsum(resume[,2])
+colnames(resume) = c("Autovalor","Porcentaje","Porcentaje acumulado")
+resume
+
+# We also represent the eigenvalues
+plot(resume[,1],type="h",
+     main="CLIMBING data",ylab="Eigenvalue")
+abline(h=mean(resume[,1]),lwd=2,lty=2,col="blue")
+```
+
+In this case, the first column represents the variance, the second, the percentage of variance represented by each component, and the third, the cumulative percentage of variance. To select the optimal number of principal components we have two criteria seen in class, select the number of PCs whose eigenvalue (variance) is greater than one (mean value of the variance), which would leave us with seven PCs, or choose a specific cumulative percentage, such as 85%, which would leave us with 12 PCs. 
+
+Since with the first criterion explained above we would only represent 70% of the total variance, we consider that we would lose too much information, so we have chosen 12 CPs as the optimal number, since representing 85% of the total variance seems to me sufficient, in addition to reducing the dimensionality of our dataset to less than half.
+
+Once this is done, we are asked to use a genetic algorithm to select the best explanatory variables, something simpler than the PCA, since we are eliminating variables directly, while in the PCA we are creating linear combinations of these.
+
+The first step would be to obtain the optimal values of the neural network parameters, which we obtained in exercise two through the *train()* function. In our case we obtained that the optimum would be a neural network of five neurons in the hidden layer and with a *decay* of 0.05. We can access these values through the model created above as follows.
+
+```{r 22}
+size = modeloRNA$bestTune$size
+decay = modeloRNA$bestTune$decay
+size
+decay
+```
+
+Once we have the parameter values, we use the genetic algorithm with the help of the **GA** package, specifically we will use the *ga()* function. First we must define the functions that we will use in the algorithm, the **fitness** function, which indicates to the algorithm the model to use and the metric to maximize, in this case we have used the hit rate; and the **Accuracy()** function, which returns the value of this hit rate in the call inside the fitness function.
+
+
+```{r 5784758, results='hide'}
+xent <- data[indient,c(-1,-2,-3)]
+
+yent <- data[indient,]$grado
+
+Accuracy <- function(modelo)
+{
+  pred=predict(modelo, type='class')
+  confuent = table(Real=yent, Prediccion=pred)
+  acc=100*sum(diag(confuent))/nrow(xent)
+  return(acc)
+}
+
+fitness <- function(string)  
+{ 
+  inc <- which(string==1)
+  X <- xent[,inc]
+  modelo = nnet(yent ~ ., size = 5, decay = 0.05, entropy=TRUE, data=cbind(yent,X))
+  Accuracy(modelo)
+}
+
+AG <- ga('binary', fitness = fitness, nBits = ncol(xent), 
+         names = colnames(xent), maxiter = 50)
+```
+
+The **fitness** function receives as input a *string*, which represents the variables to be used in our model, and gives as output the hit rate, a value calculated through the *Accuracy()* function. The results of the algorithm are shown below.
+
+```{r 6494695}
+summary(AG)
+AG@solution
+```
+
+Once the results of the genetic algorithm are obtained, we are asked to create a dichotomous variable that classifies the pathway as difficult or not difficult, where difficult pathways are those with a grade strictly greater than 7C, i.e., pathways classified as 7C+, 8A and 8A+.
+
+
+```{r 23}
+hard = rep(0,length(data$grado))
+hard[data$grado=='7C+'|data$grado=='8A'|data$grado=='8A+']=1
+data$hard=as.factor(hard)
+```
+
+Next, we will study different svm models to see which one would be the optimal among all of them. We have chosen to use the *train()* function to obtain the best model given the facilities it offers for parameter variation. In this case we are going to work with the *boot632* and *repeatedcv* methods, since our sample size is small, and radial and polynomial kernels since we have not obtained great results with other kernels, as in the case of the linear one.
+
+```{r 30,warning=FALSE}
+# With Gaussian kernel (radial basis)
+svm_valid_radial = trainControl(method='boot632',number=100)
+
+(svm_grid_radial = expand.grid(C=2^seq(from=-5,to=5,by=2),
+                               sigma=2^seq(from=-15,to=3,by=2)))
+
+svm_radial = train(hard ~ . - id - nseq - grado,data=data[indient,],method='svmRadial',trControl=svm_valid_radial,
+                   tuneGrid=svm_grid_radial, metric = 'Kappa')
+
+# With polynomial kernel
+svm_valid_poly = trainControl(method='boot632',number=100)
+
+(svm_grid_poly = expand.grid(C=2^seq(from=-5,to=5,by=2),
+                             degree=seq(from=2,to=6,by=1),scale=1))
+
+svm_poly = train(hard ~ . - id - nseq - grado,data=data[indient,],method='svmPoly',trControl=svm_valid_poly,
+                 tuneGrid=svm_grid_poly, metric = 'Kappa')
+```
+
+If we analyze the models we have created, we can access the optimal parameter values.
+
+```{r 78,warning=FALSE}
+svm_radial$bestTune
+
+svm_poly$bestTune
+```
+
+The computation time is high because we have created a grid with many values, but thanks to this we can compare a large number of models. The performance of the models with the optimized parameters is shown below.
+
+```{r 24}
+# With Gaussian kernel (radial basis)
+pred_ent_radial=predict(svm_radial,data[indient,])
+pred_test_radial=predict(svm_radial,newdata=data[-indient,])
+
+confuent_radial<-table(data[indient,]$hard, pred_ent_radial)    
+print('Training:')
+confuent_radial
+confutest_radial<-table(data[-indient,]$hard,pred_test_radial)
+print("Test:")
+confutest_radial
+
+cat("Empirical hit rate = ",100*sum(diag(confuent_radial))/nent,"\n")
+
+cat("Test hit rate = ",100*sum(diag(confutest_radial))/ntest,"\n")
+
+# With polynomial kernel
+pred_ent_poly=predict(svm_poly,data[indient,])
+pred_test_poly=predict(svm_poly,newdata=data[-indient,])
+
+confuent_poly<-table(data[indient,]$hard, pred_ent_poly)    
+print('Entrenamiento:')
+confuent_poly
+confutest_poly<-table(data[-indient,]$hard,pred_test_poly)
+print("Test:")
+confutest_poly
+
+cat("Empirical hit rate = ",100*sum(diag(confuent_poly))/nent,"\n")
+
+cat("Test hit rate = ",100*sum(diag(confutest_poly))/ntest,"\n")
+```
+
+As can be seen, the performance in the training set is very good in both models, while in the test set only the paths classified as “not difficult” are well classified. By doing a *summary()* on the dichotomous variable we have created we can better visualize the problem.
+
+```{r 65}
+summary(data$hard)
+```
+
+As can be seen, we are dealing with a case of unbalanced classification, that is, the number of cases of difficult roads is much lower compared to the non-difficult ones, so our model does not classify well the former, something that we could predict from the beginning, since when doing a *summary()* on the *grade* variable we concluded that for certain classes we did not have enough cases. Among the applicable methods for unbalanced classification we have the *Random Over Sampling Examples* (ROSE) algorithm, which serves to generate artificial cases of the minority class in order to have a larger sample. In this algorithm we set the probabilities $p$ and $q=1-p$ of both categories, which by default are 0.5, once set, we choose one of the two categories and randomly select a case from the training set that corresponds to it. Finally, through the vector of predictor variables, a case is generated from a multivariate Gaussian density function centered on that point, so the generated cases will be close to this one.
+
+```{r 25, warning=FALSE}
+data.rose <- ROSE(hard ~ . - id - nseq - grado, data=data[indient,], 
+                  seed=1234)$data
+table(data.rose$hard)
+
+svm_valid_radial = trainControl(method='boot632',number=100)
+
+(svm_bestgrid_radial = data.frame(C=svm_radial$bestTune[2],
+                                  sigma=svm_radial$bestTune[1]))
+
+svm_radial_rose = train(hard ~ . - id - nseq - grado,data=data.rose,
+                        method='svmRadial',trControl=svm_valid_radial,
+                        tuneGrid=svm_bestgrid_radial)
+
+svm_valid_poly = trainControl(method='boot632',number=100)
+
+(svm_bestgrid_poly = data.frame(C=svm_poly$bestTune[3],degree=svm_poly$bestTune[1]
+                                 ,scale=svm_poly$bestTune[2]))
+
+svm_poly_rose = train(hard ~ . - id - nseq - grado,data=data.rose,
+                      method='svmPoly',trControl=svm_valid_poly,
+                      tuneGrid=svm_bestgrid_poly)
+```
+
+In this part of the work I have tried several sampling methods, namely the *upsampling* method, the *smote* method and the *ROSE* method, explained above. I have opted for the latter since the first two do not improve the results. I would also like to point out that in this case we have chosen the optimal values of the model parameters obtained above. The performance of the Gaussian and polynomial models are shown in the following *chunk*.
+
+```{r 26}
+# Gaussian kernel (radial basis)
+pred_ent_radial_rose=predict(svm_radial_rose,data[indient,])
+pred_test_radial_rose=predict(svm_radial_rose,newdata=data[-indient,])
+
+confuent_radial_rose<-table(data[indient,]$hard, pred_ent_radial_rose)    
+print('Entrenamiento:')
+confuent_radial_rose
+confutest_radial_rose<-table(data[-indient,]$hard,pred_test_radial_rose)
+print("Test:")
+confutest_radial_rose
+
+cat("Empirical hit rate = ",100*sum(diag(confuent_radial_rose))/nent,"\n")
+
+cat("Test hit rate = ",100*sum(diag(confutest_radial_rose))/ntest,"\n")
+
+# Polynomial kernel
+pred_ent_poly_rose=predict(svm_poly_rose,data[indient,])
+pred_test_poly_rose=predict(svm_poly_rose,newdata=data[-indient,])
+
+confuent_poly_rose<-table(data[indient,]$hard, pred_ent_poly_rose)    
+print('Entrenamiento:')
+confuent_poly_rose
+confutest_poly_rose<-table(data[-indient,]$hard,pred_test_poly_rose)
+print("Test:")
+confutest_poly_rose
+
+cat("Empirical hit rate = ",100*sum(diag(confuent_poly_rose))/nent,"\n")
+
+cat("Test hit rate = ",100*sum(diag(confutest_poly_rose))/ntest,"\n")
+```
+
+As we can see, in the case of SVM with radial *kernel* we have misclassified cases for non-difficult paths, which did not happen with the unbalanced data, and for the difficult paths, it classifies well one more case of the test set. For the SVM with polynomial *kernel* the only thing to note is that the non-difficult cases are classified worse than before. 
+
+Next, we will create the simple perceptron model with the *caret* package.
+                                        
+```{r 7689, results='hide'}
+modeloPercSimp = modeloRNA = train(hard ~ . - id - nseq - grado,data=data.rose,
+                 method = "nnet", 
+                 trControl = trainControl(method = "cv"), 
+                 tuneGrid = expand.grid(size=5:10, decay=c(0.1,0.05,0.01)) )
+```                    
+
+In this case, since the size of the hidden layer is not specified, we have increased the number of grid values to compare more models. The performance of the best model obtained is shown below.
+
+```{r 27}
+summary(modeloPercSimp)
+modeloPercSimp
+
+pred_ent=predict(modeloPercSimp,data[indient,])
+pred_test=predict(modeloPercSimp,newdata=data[-indient,])
+
+confuent<-table(data[indient,]$hard, pred_ent)    
+confuent
+confutest<-table(data[-indient,]$hard,pred_test)
+confutest
+
+cat("Empirical hit rate = ",100*sum(diag(confuent))/nent,"\n")
+
+cat("Test hit rate = ",100*sum(diag(confutest))/ntest,"\n")
+``` 
+
+Our algorithm has chosen as optimal a neural network with a hidden layer of 10 neurons and a delay rate of $0.01$. Obtaining the confusion matrices of the training set and the test set we arrive at results similar to the SVM case. Some cases of non-difficult pathways are classified as difficult in both training and test, while for the difficult pathways, it classifies them perfectly for training, and in the test we obtain that it classifies well four cases out of seven we have. From my perspective, I consider the latter model to be very important, since it is the one that classifies the highest percentage of difficult cases correctly. I consider it more important to classify well the difficult routes even if we fail more in the non-difficult ones, since it is not the same for a non-experienced person to enter a difficult route believing that it is not, than for an experienced person to enter an easy route believing the opposite. Finally, let's see what prediction I would make for the path with $ID=40$.
+
+```{r 28}
+predict(svm_radial_rose,data[data$id==40,])
+predict(svm_poly_rose,data[data$id==40,])
+predict(modeloPercSimp,data[data$id==40,])
+``` 
+
+As can be seen, all three models catalog well the track, which is grade 7C, so it is not difficult. 
