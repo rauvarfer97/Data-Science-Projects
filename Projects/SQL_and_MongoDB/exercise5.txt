@@ -1,0 +1,3 @@
+{nombre:Carmen,apellido:García,tfno:654213900}
+{nombre:Manuel,apellido:Jiménez,tfno:666111234;608523478;612333456}
+{nombre:Carmen,apellido:González,email:carmen@ema.il}
