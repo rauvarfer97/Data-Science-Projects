@@ -1,0 +1,376 @@
+---
+title: "Temporal Series Project"
+author: "Raúl Varela Ferrando"
+always_allow_html: true
+output: pdf_document
+---
+
+<div class=text-justify>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r paquetes, include=FALSE}
+library(TSA)
+library(tseries)
+library(rpart)
+library(readxl)
+library(MASS)
+library(foreign)
+library(tidyverse)
+library(DMwR2)
+library(randomForest)
+library(caret)
+library(corrplot)
+library(GA)
+library(performanceEstimation)
+library(ROSE)
+library(forecast)
+```
+
+
+## Summary
+
+<div class=text-justify>
+
+In this work, we will address the treatment of time series in the **RStudio** environment using everything we have learned throughout the course. We will use the **electricity** dataset provided by the **TSA** package, from which we will create different models and evaluate their performance, while also presenting the various conclusions we obtain.
+
+----------------------------------------
+
+We start by reading the data, observing its contents and properties.
+
+```{r 1}
+data("electricity")
+str(electricity)
+summary(electricity)
+
+data = window(electricity, start = c(1973,1), end = c(1989,12))
+```
+
+As detailed in the document containing the job statement, we have a dataset that includes a time series with data on monthly electricity generation in the U.S. With the help of the *window* function, which allows us to extract a subset of data from our series, we select the cases to study.
+
+```{r 2}
+plot(data, col="red", lwd=2, ylab="Electricity Generated (GW)", 
+     main="Monthly Electricity Generation (USA)")
+
+```
+
+In the previous graph, we can observe our data. This curve can give us an idea of the integration scheme that our data follows, which initially appears to be multiplicative since the amplitude of the variations seems to increase over time. However, for better identification, we will look at the graph of the complete *electricity* dataset.
+
+```{r 3}
+plot(electricity, col = 'blue' ,ylab="Electricity Generated (GW)", 
+     main="Monthly Electricity Generation (USA)")
+
+```
+
+Once we see this graph, we can determine that the integration scheme is multiplicative, meaning that it follows this behavior:
+$X_{t} = TC_{t} \cdot E_{t} \cdot I_{t}$
+and knowing this, we can now decompose our series into its different components (trend-cycle, seasonal, and irregular components) in order to make predictions.
+
+```{r 4}
+componentes=decompose(data,type=c("multiplicative"))
+plot(componentes)
+```
+
+The first graph corresponds to the observed data, and the following ones, in descending order, to the trend, the seasonal component, and the irregular component. The *decompose()* function returns a list with different elements. The trend is increasing, as expected, reflecting the rise in electricity consumption as technology developed towards the end of the last century.
+
+```{r 5}
+str(componentes)
+summary(componentes)
+```
+
+Now we will store the trend of our series.
+
+```{r 6}
+trend=componentes$trend
+trend
+plot(trend,col = 'blue' ,ylab="Trend component (GW)", 
+     main="Trend of monthly electricity generation (USA)")
+```
+
+It is worth noting that both the first values of the trend and the last ones are not defined. To obtain the *seasonal* variation indices, we access the seasonal element of our list as we did previously.
+
+```{r 7}
+seasonind=componentes$seasonal
+seasonind[1:12]
+plot(seasonind[1:12],type="h", col = 'blue' ,xlab = 'Months', ylab="", 
+     main="Seasonal Variation Indices")
+```
+
+Through the value of these indices, we can see that the seasons in which we consume the most electricity are summer and winter, which is logical due to the use of air conditioning and heating. We only represent the first twelve elements because they are annual repetitions of the same values. Next, we deseasonalize our series, obtaining the secular trend, that is, the multiplication of the trend-cycle and irregular components.
+$\frac{X_{t}}{{E_{t}}} = {TC_{t} \cdot I_{t}}$
+
+
+```{r 8}
+data_desest=data/seasonind
+
+Time=time(data_desest)
+
+plot(data_desest,col = 'blue' ,ylab="Electricity Generated (GW)", 
+     main="Seasonally Adjusted Monthly Electricity Generation (USA)")
+```
+
+Once we have deseasonalized our series, we can make predictions using a linear model.
+
+```{r 9}
+t = seq(1973,1989.917,by=1/12)
+t2=t^2
+modelo = lm(componentes$trend ~ t+t2)
+summary(modelo)
+
+coef=as.vector(modelo$coefficients)
+n=coef[1]
+m=coef[2]
+l=coef[3]
+
+
+plot(data,type="l",ylim=c(min(data),max(data)),ylab='Electricity Generated (GW)', 
+     main='Monthly Electricity Generated (USA)')
+lines(l*Time^2 + m*Time + n,type="l",lty=2,col=2,ylab="")
+legend('topleft', legend=c("Datos", "Regression Line"), 
+       col=c("black", "red"), lty=1:2, cex=0.8)
+```
+
+It can be observed that the trend follows the observed data while ignoring their variations. On the other hand, we have obtained a statistic $R^2=0.933$, a value that reflects a good fit to the data.
+
+Finally, we proceed to make predictions until the end of the following year, that is, until December 1990. In this case, we have two ways to proceed: calculating the predictions manually following the multiplicative integration scheme or using the *predict* function.
+
+
+```{r 10}
+frec=12
+future=seq(1990,1990.917,by=1/12)
+tsecular = l*future^2 + m*future + n
+pred=tsecular*seasonind[1:frec]
+
+predts=ts(pred, start = c(1990,1), frequency = 12)
+
+plot(data, type="l",lwd=1,col=1,xlim=c(1973,1991), ylab='Generated Electricity (GW)', 
+     main='Observed Data and Predictions for 1991')
+lines(predts,type="l",col='red',ylab="")
+legend('topleft', legend=c("Datos", "Predictions"), 
+       col=c("black", "red"), lty=1:2, cex=0.8)
+```
+
+Below is the procedure for using the *predict()* function:
+
+```{r 12, collapse=TRUE}
+# We make the prediction of the trend
+t_future = seq(1973,1990.971,by=1/12)
+t_future2=t_future^2
+prediccion = predict(modelo, data.frame(t_future,t_future2))
+prediccionts = ts(prediccion,start=1973,freq=12)
+plot(data, type="l",lwd=1,col='black',xlim=c(1973,1991), 
+     ylab='Electricity Generated (GW)', 
+     main='Observed Data, Regression Line and Trend')
+lines(prediccionts,col='red',lwd=2,type="l")
+lines(trend,col='blue',lwd=2,type="l")
+legend('topleft', legend=c("Data", "Regression Line", 'Trend'), 
+       col=c("black", "red", 'blue'), lty=1:2, cex=0.8)
+
+# We incorporate the other components
+indest=rep(componentes$figure,18)
+prediccionfinal=prediccion*indest
+prediccionfinalts = ts(prediccionfinal,start=1973,freq=12)
+plot(data, type="l",lwd=1,col='black',xlim=c(1973,1991), 
+     ylab='Electricity Generated (GW)', 
+     main='Observed Data, Regression Line and Predictions')
+lines(prediccionts,col='red',lwd=2,type="l")
+lines(prediccionfinalts,col='blue',lwd=2,type="l")
+legend('topleft', legend=c("Data", "Regression Line", 'Trend'), 
+       col=c("black", "red", 'blue'), lty=1:2, cex=0.8)
+```
+
+Once we have the predictions, we will proceed to the calculation of error measures with the help of the *forecast* package, specifically using the *accuracy()* function, which returns a list with the values of different error measures (ME, RMSE, MAE, MAPE, ACF1, and Theil's U).
+
+```{r 14}
+med_error1=accuracy(prediccionfinalts,electricity)
+var=var(electricity)
+porcent_var1=as.numeric(med_error1[2]^2/var*100)
+
+cat('The root mean squared error (RMSE) is:',med_error1[2],'\n')
+cat('The percentage of RMSE compared to the variance of the variable is:', 
+    porcent_var1,' % \n')
+```
+
+We have obtained very acceptable values, so we consider that our predictions fit our data quite well. We can compare them with the results obtained from manually calculated predictions:
+
+```{r 15}
+med_error2=accuracy(predts,electricity)
+porcent_var2=as.numeric(med_error2[2]^2/var*100)
+
+cat('The root mean squared error (RMSE) is:',med_error2[2],'\n')
+cat('The percentage of RMSE compared to the variance of the variable is:', 
+    porcent_var2,' % \n')
+
+```
+
+As expected, those obtained through the *predict()* function present less error than those calculated manually.
+
+Next, we will analyze the data using exponential smoothing. In this case, since our time series exhibits a linear trend as well as some seasonality, the appropriate method would be Holt-Winters triple smoothing. Using this algorithm, we have three parameters called smoothing constants ($\alpha, \beta, \gamma$), associated with the estimates of the intercept term ($S_i$), the slope ($b_i$), and the seasonal component ($E_i$). Considering our case, a multiplicative time series with a certain periodicity, represented by the letter L, these terms are related to the smoothing constants as follows:
+
+
+$\hspace{5cm} S_i=\alpha \cdot \frac{X_i}{E_{i-L}}+(1-\alpha) \cdot (S_{i-1}+b_{i-1})$
+
+$\hspace{5cm} b_i=\beta \cdot (S_i-S_{i-1}) + (1-\beta)\cdot b_{i-1}$
+
+$\hspace{5cm} E_i=\gamma \cdot \frac{X_i}{S_i}+(1-\gamma) \cdot E_{i-L}, \hspace{1cm} \forall \alpha, \beta, \gamma \in [0,1]$
+
+For this, we will use the *HoltWinters()* function, which applies the smoothing explained in the previous paragraph.
+
+```{r 16}
+data_HW=HoltWinters(data, seasonal = 'multiplicative')
+data_HW
+
+plot(data, type="l",lwd=1,col='black',xlim=c(1973,1990.917), 
+      ylab='Electricity Generated (GW)', 
+     main='Representation of Observed and Smoothed Data')
+lines(data_HW$fitted[,1], col='red',lwd=2,type="l")
+legend('topleft', legend=c("Observed Data", "Smoothed Data"), 
+       col=c("black", "red"), lty=1:2, cex=0.8)
+```
+
+To make the predictions, we will use the*predict()* funtion.
+
+```{r 17}
+pred_data_HW=predict(data_HW, n.ahead = 12)
+
+plot(window(electricity, start=c(1973,1), end=c(1990,12)), type="l",lwd=1,col='black',xlim=c(1973,1990.917), 
+     ylab='Electricity Generated (GW)', 
+     main='Representation of Observed and Smoothed Data'
+)
+lines(data_HW$fitted[,1], col='red',lwd=2,type="l")
+lines(pred_data_HW, col='blue',lwd=2,type="l")
+legend('topleft', legend=c("Observed Data", "Smoothed Data" 
+                           "Smoothed Data Predictions"), 
+       col=c("black", "red",'blue'), lty=1:2, cex=0.8)
+```
+
+Lastly, we will calculate the error measures using the *accuracy()* function as we did previously.
+
+```{r 18}
+med_error_HW=accuracy(pred_data_HW,electricity)
+porcent_var_HW=as.numeric(med_error_HW[2]^2/var*100)
+
+cat('The root mean squared error (RMSE) is:',med_error_HW[2],'\n')
+cat('The percentage of RMSE relative to the variance of the variable is:', 
+    porcent_var_HW,' % \n')
+
+```
+
+In this case, we have slightly more error than when using the `predict` function with the linear model from the first exercise.
+
+To conclude the section on time series, we are asked to analyze a dataset of our choice. In my case, I will continue using the one I have been working with so far, applying the Box-Jenkins methodology, selecting a 12-year interval of our choice, and making predictions up to the following year.
+
+The first steps of this methodology involve reading and representing the data, which we have already done at the beginning of this document, so we will not repeat it here. Next, we will determine whether the series is stationary or requires any transformation.
+
+```{r 19}
+data12 = window(electricity, start = c(1973,1), end = c(1984,12))
+anual = matrix(data12, nr=12, byrow=F)
+
+mean = c(rep(0,12))
+sd = c(rep(0,12))
+
+for(i in 1:12) {mean[i] = mean(anual[,i])
+sd[i] = sd(anual[,i])
+}
+
+plot(mean,sd)
+```
+
+To obtain the parameter $\lambda$ of the Box-Cox transformation, we will use the *forecast* library, specifically the *BoxCox.lambda()* function. Considering that this parameter can take values in the interval
+
+```{r 20}
+lambda=BoxCox.lambda(data12,lower=-5,upper=5)
+lambda
+
+plot(BoxCox(data12,lambda))
+```
+
+We obtain a parameter $\lambda=-0.64$, so we perform the necessary transformation:
+
+```{r 21}
+data12=(data12^lambda-1)/lambda
+plot(data12)
+plot(data12, col = 'blue' , 
+     main="Monthly electricity generation after Box-Cox transformation (USA)")
+```
+
+Once this is done, we will check for stationarity in the mean of our series.
+
+```{r 22, warning=FALSE}
+acf(data12,main="FAS")
+
+data12_dif = diff(data12, lag = 1, differences = 1)
+acf(data12_dif,main="FAS de la primera diferencia")
+
+data12_dif2 <- diff(data12_dif, lag = 12, differences = 1)
+plot(data12_dif2)
+acf(data12_dif2,
+    main="FAS after a regular difference and a seasonal one"
+)
+
+adf.test(data12)
+adf.test(data12_dif)
+adf.test(data12_dif2)
+```
+
+As can be observed, already with the data directly after the Box-Cox transformation, we obtain a rather small p-value, so we can reject the null hypothesis that our series is not stationary, that is, we accept its stationarity.
+
+```{r 23, warning=FALSE}
+pacf(data12_dif2,main="FAS after a regular difference and a seasonal one")
+
+eacf(data12_dif2) 
+```
+
+Given that $p \ge 1 , q \ge 1$, the models to be evaluated would be ARMA(1,1) or ARMA(1,2). Since our data already have differences applied to be stationary, our parameter $d=0$. There is also the function *auto.arima()*, which returns an estimate of the model parameters when executed, which we will use next for a better fit.
+
+```{r 24, warning=FALSE}
+fit1 = arima(data12_dif2, order = c(0, 0, 1), 
+             seasonal = list(order = c(1, 0, 0), period = 12)) 
+fit1
+Box.test(fit1$residuals, lag = 1, type = "Ljung")
+
+fit2 = arima(data12_dif2, order = c(0, 0, 2), 
+             seasonal = list(order = c(1, 0, 0), period = 12)) 
+fit2
+Box.test(fit2$residuals, lag = 1, type = "Ljung")
+
+ajuste=auto.arima(data12_dif2)
+ajuste 
+Box.test(ajuste$residuals, lag = 1, type = "Ljung")
+```
+
+In all models, we obtain a high p-value, which indicates that we can accept the null hypothesis that there is no autocorrelation. Finally, it remains to undo the data transformations to obtain the predictions in the initial data.
+
+```{r 25}
+data.pred = predict(fit2,n.ahead=24)
+
+data_all = c(data12_dif2,data.pred$pred)
+data_all = ts(data_all, start=c(1973,1),freq=12)
+plot(data_all,type="l")
+
+data_all = diffinv(data_all,lag = 12, differences = 1,
+xi = c(data12_dif[1] ,data12_dif[2], data12_dif[3],
+data12_dif[4], data12_dif[5], data12_dif[6],
+data12_dif[7], data12_dif[8], data12_dif[9],
+data12_dif[10], data12_dif[11], data12_dif[12]))
+data_all = ts(data_all, start=1973,freq=12)
+data_all = diffinv(data_all,lag = 1, differences = 1,
+xi = data12[1])
+data_all = (lambda*data_all+1)^(1/lambda)
+data_all = ts(data_all, start=1973,freq=12)
+
+plot(data_all, type="l",lwd=1,col='black',xlim=c(1973,1987), 
+     ylab='Generated Electricity (GW)', 
+     main='Representation of the Predicted Data'
+)
+lines(data12, col='red',lwd=2,type="l")
+
+```
+
+We can also represent the predictions of the model created with the *auto.arima()* function.
+
+```{r 26}
+plot(forecast(ajuste,h=12))
+```
