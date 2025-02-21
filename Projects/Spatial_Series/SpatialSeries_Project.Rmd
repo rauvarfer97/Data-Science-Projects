@@ -1,5 +1,5 @@
 ---
-title: "Spatial Series Project"
+title: "Spatial Dependence Analysis and Modeling: A Comparative Study of SAR and SEM Models"
 author: "Raúl Varela Ferrando"
 always_allow_html: true
 output: pdf_document

@@ -1,5 +1,5 @@
 ---
-title: "Machine Learning II Project"
+title: "Comparative Evaluation of Classification Models: Classification and Regression Trees, Random Forest, and Artificial Neural Networks"
 author: "Raúl Varela Ferrando"
 always_allow_html: true
 output: pdf_document
@@ -32,7 +32,7 @@ library(nnet)
 
 <div class=text-justify>
 
-In this work we will face a classification problem from different perspectives in the *RStudio* environment using everything we have learned throughout the **MLI** and **MLII** courses. We will use a dataset provided by the professor of the course from which we will create different models and evaluate the performance of each of them, exposing the different conclusions we obtain.
+In this work we will face a classification problem from different perspectives in a *RStudio* environment. We will use a dataset from which we will create different models and evaluate the performance of each of them, exposing the different conclusions we obtain.
 
 ----------------------------------------
 

@@ -1,5 +1,5 @@
 ---
-title: "Machine Learning Project"
+title: "Comparative Analysis of Classification Models: Evaluating Naïve Bayes and Discriminant Analysis Approaches"
 author: "Raúl Varela Ferrando"
 always_allow_html: true
 output: pdf_document

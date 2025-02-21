@@ -1,5 +1,5 @@
 ---
-title: "Temporal Series Project"
+title: "Time Series Analysis and Forecasting: Decomposition, Regression, and ARIMA Modeling"
 author: "Raúl Varela Ferrando"
 always_allow_html: true
 output: pdf_document

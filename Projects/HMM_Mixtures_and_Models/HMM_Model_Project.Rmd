@@ -1,5 +1,5 @@
 ---
-title: "HMM model for time series"
+title: "Hidden Markov Models for Air Pollution Analysis: A Case Study on NO₂ Time Series"
 author: "Raúl Varela Ferrando"
 output:
   html_document:
