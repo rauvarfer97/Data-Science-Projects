@@ -6,7 +6,7 @@ This repository contains the projects I developed. Each folder corresponds to a 
 
 ## 📂 **Repository Structure**  
 
-### 📂 **Projects**  
+### 📂 **Projects:**  
 
 - 📁 **Attribute_Selection:** Analysis and Evaluation of Variable Selection Techniques for Classification Models  
 - 📁 **Boosting:** Model Estimation using Boosting and Gradient Boosting with XGBoost  
