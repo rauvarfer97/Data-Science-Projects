@@ -6,6 +6,8 @@ This repository contains the projects I developed. Each folder corresponds to a 
 
 ## 📂 **Repository Structure**  
 
+### 📂 **Projects**  
+
 - 📁 **Attribute_Selection:** Analysis and Evaluation of Variable Selection Techniques for Classification Models  
 - 📁 **Boosting:** Model Estimation using Boosting and Gradient Boosting with XGBoost  
 - 📁 **CART_RF_ANNS:** Comparative Evaluation of Classification Models (Classification and Regression Trees, Random Forest, and Artificial Neural Networks)  
