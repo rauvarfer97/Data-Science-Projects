@@ -24,7 +24,7 @@ This repository contains the projects I developed. Each folder corresponds to a 
 - 📁 **eb_Scrapping:** Extracting and Analyzing E-Commerce Product Data  
 
 Each folder contains:  
-✅ Source code (`.py`, `.ipynb`, .r, .rmd, etc.)  
+✅ Source code (`.py`, `.ipynb`, `.r`, `.rmd`, etc.)  
 ✅ Documentation and notes in `README.md`  
 ✅ Sample datasets (if applicable)  
 
