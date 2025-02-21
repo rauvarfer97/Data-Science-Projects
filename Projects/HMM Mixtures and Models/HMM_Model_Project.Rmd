@@ -1,0 +1,119 @@
+---
+title: "HMM model for time series"
+author: "Raúl Varela Ferrando"
+output:
+  html_document:
+    df_print: paged
+always_allow_html: yes
+---
+
+<div class=text-justify>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r paquetes, include=FALSE}
+library(tinytex)
+library(depmixS4)
+```
+
+
+#### Working with the data frame available in “Contamin.RData”, already used in the material of the topic Mixtures and HMM models (HMM4.R) an HMM model for the time series no2 must be fitted. 
+
+First we load the data we are going to work with.
+
+```{r 1}
+load(file="Contamin.RData")
+summary(datos)
+str(datos)
+```
+
+As can be seen, they are numerical variables of float64 type which represent time series, specifically daily measurements of 5 pollution variables. We can also observe that they do not have the same length.
+In our case the study variable will be $NO_2$, which is represented by the second series contained in our element *data*.
+
+```{r 2}
+plot(datos[[2]],type="l",xlab="t",ylab="",
+       main=names(datos)[2])
+```
+
+To facilitate the handling of the information we are going to create a data.frame for the time series we want to study.
+
+```{r 3}
+data=data.frame(y=datos[2])
+```
+
+As in the class example, since we do not know the number of hidden states, we will study different models with different numbers of hidden states and select the one that best fits through the BIC criterion.
+
+```{r 5}
+vstates=1:10  #list of states to compare
+vBIC= array(99999,length(vstates))
+for (vk in 1:length(vstates))
+{
+  cat("number of states = ",vstates[vk],"\n")
+  modelvk <- fit(depmix(response = no2 ~ 1, 
+                  data = data, nstates = vstates[vk]))
+  
+  newBIC=BIC(modelvk)
+
+  if (newBIC<min(vBIC)) model=modelvk
+  vBIC[vk]=newBIC
+
+}
+
+plot(vstates,vBIC, type='l', xlab="Hidden states", ylab="BIC", main="no2")
+```
+
+As can be seen in the graph the best model according to the BIC criterion corresponds to the case in which we have 3 hidden states. This model has been stored in the object *model*.
+
+```{r 6}
+model
+summary(model)
+```
+
+Through summary() we can see the transition matrix, the initial probabilities of the three states, the means and standard deviations.
+
+```{r 8}
+states=model@posterior$state
+
+par(mfrow=c(2,1))
+
+plot(datos$no2, type='l',xlab="t",ylab="no2")
+grid()
+
+numstates=model@nstates
+response= matrix(datos$no2,nrow=length(datos$no2),ncol=numstates)
+for (j in 1:ncol(response))
+  response[states!=j,j]= NA
+
+matplot(response,type="l",ylab="no2",lty=1,
+        main="contamination according to the states")
+legend("topleft",lty=1,col=1:4,cex=0.6,
+       legend=paste("State ",1:numstates))
+grid()
+```
+
+This would be the representation of the values assigned to the different hidden states, which, as we saw earlier, the model that best fits would be the one with three hidden states. Finally, we will obtain the normal densities of the different states along with the core density of our time series.
+
+```{r 7}
+ParNorm=summary(model)
+means=ParNorm[,1]
+dts=ParNorm[,2]
+probstates=prop.table(table(states))
+
+plot(density(datos$no2),ylab="",lwd=2,
+     main=paste("Adjusted core and normal densities\n","no2"))
+
+for (j in 1:numstates)
+  curve(probstates[j]*dnorm(x,medias[j],dts[j]),
+      add=T,col=j+1,lwd=2,lty=2)
+
+legend("topright",lty=2,lwd=2,col=(1:numstates)+1,
+       legend=paste("State ",1:numstates))
+grid()
+
+```
+
+<div class=text-justify>
+
+ 
