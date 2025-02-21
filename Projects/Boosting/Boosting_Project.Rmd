@@ -1,0 +1,97 @@
+---
+title: "Model Estimation using Boosting and Gradient Boosting with XGBoost"
+author: "Raúl Varela Ferrando"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+always_allow_html: yes
+---
+
+<div class=text-justify>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r paquetes, include=FALSE}
+library(tidyverse)
+library(tinytex)
+library(catdata)
+library(caret)
+library(adabag)
+library(xgboost)
+library(readxl)
+```
+
+#### Using the score_test.xlsx dataset with a train/test split (75% and 25%):
+
+#### 1. Using the train function from the caret library, build and estimate a boosting model by determining a parameter configuration {mfinal, maxdepth, and coeflearn}.
+
+Before starting, it is worth mentioning that we modified the data within RStudio to remove the id variable, which only served as an identifier for each observation. The variable to be studied will be **Empleado**, which represents whether the person is employed (1) or not employed (0), and our predictor variables will be the remaining ones.
+
+```{r 1}
+data0 = read_excel('score_test.xlsx')[,-1]
+data = as.data.frame(data0)
+data$Empleado = as.factor(data0$Empleado)
+```
+
+
+```{r 2}
+set.seed(1735791)
+ind_train = createDataPartition(data$Empleado, p=0.75, list=FALSE)
+data_train = data[ind_train,]
+data_test = data[-ind_train,]
+```
+
+Now, we proceed to create our model using the train() function. Since we can specify the variables in the same command, we did not do it earlier. The values given to mfinal, maxdepth, and coeflearn were chosen in such a way that the comparisons do not take too long to run, although in my case, it still took a while.
+
+```{r 3}
+boost_valid = trainControl(method='cv',number=10)
+
+boost_grid = expand.grid(mfinal=seq(5,25,5),maxdepth=c(1,2,4),
+                          coeflearn=c("Breiman","Zhu"))
+
+boost = train(Empleado ~ .,data=data_train,
+              method='AdaBoost.M1',
+              trControl=boost_valid,
+              preProc = c("center", "scale"),
+              tuneGrid = boost_grid)
+boost
+```
+
+```{r 4}
+boost$bestTune
+boost$results
+```
+
+As observed, the chosen criterion was the accuracy rate, achieving a value of $98.8%$.
+
+#### 2. Build and estimate the performance of a gradient boosting model with XGBoost.
+
+To use this function, we need to convert the data into a matrix, and the binary variable must be converted into a numeric variable, as it is the only type of variable accepted.
+
+```{r RecargaDatos}
+data0 = read_excel('score_test.xlsx')[,-1]
+data = as.matrix(data0[-1])
+
+empleado = as.numeric(data0$Empleado)
+
+train.data = data[ind_train,]
+train.empleado = empleado[ind_train]
+test.data = data[-ind_train,]
+test.empleado = empleado[-ind_train]
+```
+
+```{r XGBoost}
+model = xgboost(data=train.data, label=train.empleado, max.depth=4, eta=0.3, nthread=2, nround=10, objective = "multi:softmax",num_class=3)
+model
+```
+Making predictions on the test set and evaluating our model, we obtain the following results.
+
+```{r XGBoostResultados}
+pred = predict(model,test.data)
+mconf = table(test.empleado,pred,dnn=c("Real","Pred"))
+mconf
+```
+In this case, we obtain better results than in the previous analyses, so I will leave only these results. We have a $100%$ accuracy for cases where the person is not employed and approximately a $98%$ accuracy for those who are employed.
