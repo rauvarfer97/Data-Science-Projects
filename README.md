@@ -6,22 +6,22 @@ This repository contains the projects I developed. Each folder corresponds to a 
 
 ## 📂 **Repository Structure**  
 
-📁 Attribute_Selection: Analysis and Evaluation of Variable Selection Techniques for Classification Models
-📁 Boosting: Model Estimation using Boosting and Gradient Boosting with XGBoost
-📁 CART_RF_ANNS: Comparative Evaluation of Classification Models (Classification and Regression Trees, Random Forest, and Artificial Neural Networks)
-📁 Complex_Systems: NetLogo Simulations for Group Properties Evaluation
-📁 HMM_Mixtures_and_Models: Hidden Markov Models for Air Pollution Analysis (A Case Study on NO₂ Time Series)
-📁 kNN_Classifier: Feature Selection and Predictive Modeling Using Weighted and Random kNN
-📁 Language_Detection: Multilingual Text Classification (A Machine Learning Approach for Language Detection and Analysis)
-📁 NaiveBayes_Classifier: Comparative Analysis of Classification Models (Evaluating Naïve Bayes and Discriminant Analysis Approaches)
-📁 Pentahoo: Analyzing Music Streaming Trends with Pentaho Kettle (Data Integration and Insights)
-📁 Recommender_Systems: User-Centric Recommender System (Integrating Feedback for Personalized Recommendations)
-📁 Shiny: Enhancing Interactive Data Visualization with Shiny (Development, Customization, and Extensions)
-📁 Spark: Scalable Data Processing with PySpark and Pandas
-📁 Spatial_Series: Spatial Dependence Analysis and Modeling (A Comparative Study of SAR and SEM Models)
-📁 SQL_and_MongoDB: A Comparative Study of Relational and NoSQL Databases (SQL and MongoDB)
-📁 Temporal_Series: Time Series Analysis and Forecasting (Decomposition, Regression, and ARIMA Modeling)
-📁 Web_Scrapping: Extracting and Analyzing E-Commerce Product Data
+📁 Attribute_Selection: Analysis and Evaluation of Variable Selection Techniques for Classification Models  
+📁 Boosting: Model Estimation using Boosting and Gradient Boosting with XGBoost  
+📁 CART_RF_ANNS: Comparative Evaluation of Classification Models (Classification and Regression Trees, Random Forest, and Artificial Neural Networks)  
+📁 Complex_Systems: NetLogo Simulations for Group Properties Evaluation  
+📁 HMM_Mixtures_and_Models: Hidden Markov Models for Air Pollution Analysis (A Case Study on NO₂ Time Series)  
+📁 kNN_Classifier: Feature Selection and Predictive Modeling Using Weighted and Random kNN  
+📁 Language_Detection: Multilingual Text Classification (A Machine Learning Approach for Language Detection and Analysis)  
+📁 NaiveBayes_Classifier: Comparative Analysis of Classification Models (Evaluating Naïve Bayes and Discriminant Analysis Approaches)  
+📁 Pentahoo: Analyzing Music Streaming Trends with Pentaho Kettle (Data Integration and Insights)  
+📁 Recommender_Systems: User-Centric Recommender System (Integrating Feedback for Personalized Recommendations)  
+📁 Shiny: Enhancing Interactive Data Visualization with Shiny (Development, Customization, and Extensions)  
+📁 Spark: Scalable Data Processing with PySpark and Pandas  
+📁 Spatial_Series: Spatial Dependence Analysis and Modeling (A Comparative Study of SAR and SEM Models)  
+📁 SQL_and_MongoDB: A Comparative Study of Relational and NoSQL Databases (SQL and MongoDB)  
+📁 Temporal_Series: Time Series Analysis and Forecasting (Decomposition, Regression, and ARIMA Modeling)  
+📁 Web_Scrapping: Extracting and Analyzing E-Commerce Product Data  
 
 Each folder contains:  
 ✅ Source code (`.py`, `.ipynb`, .r, .rmd, etc.)  
