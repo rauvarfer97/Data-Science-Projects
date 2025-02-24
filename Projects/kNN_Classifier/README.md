@@ -3,16 +3,13 @@
 This directory contains files related to a project on KNN Regression conducted by Raúl Varela Ferrando. The work explores a regression model using the K-Nearest Neighbors (KNN) algorithm and includes data preparation, model fitting, and error analysis. The project uses the dataset khantrainadd2.csv and provides a comparative study between two KNN regression models: Weighted KNN and Random KNN. Below is an explanation of each file in the directory.
 
 ## Files in the Directory
-### 1. Sknn_Varela_Ferrando.r:
+### 1. kNN_Class_Project.r:
    This is the R script that contains the code for the regression analysis. It includes steps for data loading, preprocessing, model training, and evaluation.
 
-### 2. Sknn_Varela_Ferrando.rmd:
+### 2. kNN_Class_Project.rmd:
    This R Markdown file contains both the code and detailed comments explaining the steps of the project. It combines R code chunks with narrative text to describe the methodology and results of the analysis.
 
-### 3. Sknn_Varela_Ferrando.pdf:
-   This is the PDF output generated from the R Markdown file. It presents the results, including tables and figures, as formatted in the RMD file, making it suitable for sharing and printing.
-
-### 4. khantrainadd2.csv:
+### 3. khantrainadd2.csv:
    This CSV file contains the dataset used for the analysis. It includes various features that are used to predict the target variable using the KNN regression models.
 
 ## Project Workflow
@@ -37,7 +34,7 @@ The second model is a Random KNN regression using cross-validation. Key steps:
 ### 4. Comparison of Models:
 A comparative study of both models is performed based on their MSE. The Weighted KNN model yields a lower MSE (130.86) compared to the Random KNN model, which gives MSE values of 209.84 and 157.17 before and after feature selection, respectively.
 
-Requirements
+**Requeriments**
 To run the R script and R Markdown file, make sure to install the necessary packages:
 
 ```
