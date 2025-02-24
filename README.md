@@ -40,7 +40,7 @@ Each folder contains:
 - **Libraries**: NumPy, Pandas, Scikit-learn, Keras, TensorFlow, PyTorch, Matplotlib, Seaborn, Hugging Face, Beautiful Soup, PySpark and many others.
 - **Databases**: MySQL, MongoDB.
 - **Tools**: Jupyter Notebooks, Shiny, Pentahoo, RStudio, Google Collab, etc.
-- 
+
 ---
 
 ## 🤝 **Contributions & Contact**  
