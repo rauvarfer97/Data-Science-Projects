@@ -1,4 +1,4 @@
-# Real Estate Price Prediction with PySpark and Pandas
+# Real Estate Price Prediction with PySpark and Pandas in a Google Collab environment
 
 ## Project Overview
 This project focuses on **real estate price prediction** using **PySpark and Pandas** in a **Google Colab environment**. The dataset consists of various housing attributes, such as lot area, neighborhood, construction year, number of rooms, and overall quality, which are used to train and evaluate machine learning models.
