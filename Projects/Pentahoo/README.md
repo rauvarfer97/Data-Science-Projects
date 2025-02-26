@@ -1,4 +1,4 @@
-# Data Transformation and Analysis using Pentaho
+# Analyzing Music Streaming Trends with Pentaho Kettle (Data Integration and Insights)
 
 ## Project Overview
 This project focuses on **data transformation and analysis using Pentaho Data Integration (Kettle)**. It processes datasets containing **Spotify streaming data** to extract insights on top songs, artists, and genres. The workflow involves **data cleansing, transformation, and merging** to generate meaningful outputs.
