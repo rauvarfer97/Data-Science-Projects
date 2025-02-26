@@ -1,4 +1,4 @@
-# Time Series Analysis and Forecasting
+# Time Series Analysis and Forecasting (Decomposition, Regression, and ARIMA Modeling)
 
 ## Project Overview
 This project focuses on **time series analysis and forecasting** using the **electricity dataset** from the **TSA package** in R. The objective is to explore and apply various **time series modeling techniques**, including **regression trees, random forests, and forecasting models**, to analyze electricity consumption patterns.
