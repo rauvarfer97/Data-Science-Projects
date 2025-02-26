@@ -1,4 +1,4 @@
-# Spatial Regression Analysis with R
+# Spatial Dependence Analysis and Modeling (A Comparative Study of SAR and SEM Models)
 
 ## Project Overview
 This project focuses on **spatial regression models** using **spatial data analysis techniques** in **R**. The dataset is generated using the **`genera_esp.R`** script, which simulates **spatially correlated data** for regression modeling. The main objective is to analyze spatial relationships and dependencies within the generated dataset.
