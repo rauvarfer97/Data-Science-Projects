@@ -41,7 +41,7 @@ To run the R script and R Markdown file, make sure to install the necessary pack
 install.packages(c("kknn", "caret", "rknn", "ggplot2"))
 ```
 
-## How to Reproduce the Analysis
+### How to Reproduce the Analysis
 
 1. Load the data by reading the khantrainadd2.csv file.
 2. Follow the steps in the Sknn_Varela_Ferrando.rmd file to process the data and fit the models.
