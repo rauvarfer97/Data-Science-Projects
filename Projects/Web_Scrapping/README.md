@@ -1,4 +1,4 @@
-# Web Scraping for E-Commerce Data Analysis
+# Extracting and Analyzing E-Commerce Product Data
 
 ## Project Overview
 This project focuses on **web scraping** to extract e-commerce data from the website **[webscraper.io](https://webscraper.io/test-sites/e-commerce/allinone)**. The extracted data is then analyzed and visualized using **Pandas and Plotly**.
