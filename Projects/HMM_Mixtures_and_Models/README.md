@@ -1,4 +1,4 @@
-# Hidden Markov Models for Air Pollution Analysis
+# Hidden Markov Models for Air Pollution Analysis: A Case Study on NO₂ Time Series
 
 ## Project Overview
 This project implements **Hidden Markov Models (HMM)** to analyze air pollution time series, focusing on **NO₂** levels. The study utilizes data from **Contamin.RData**, which contains daily measurements of five different pollution variables. The objective is to fit an HMM model to the NO₂ time series and determine the optimal number of hidden states based on the **Bayesian Information Criterion (BIC)**.
