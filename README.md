@@ -17,11 +17,11 @@ This repository contains the projects I developed. Each folder corresponds to a 
 - 📁 **Language_Detection:** Multilingual Text Classification (A Machine Learning Approach for Language Detection and Analysis)  
 - 📁 **NaiveBayes_Discriminant_Classifier:** Comparative Analysis of Classification Models (Evaluating Naïve Bayes and Discriminant Analysis Approaches)  
 - 📁 **Pentahoo:** Analyzing Music Streaming Trends with Pentaho Kettle (Data Integration and Insights)  
-- 📁 **Recommender_Systems:** User-Centric Recommender System (Integrating Feedback for Personalized Recommendations)  
-- 📁 **Shiny:** Enhancing Interactive Data Visualization with Shiny (Development, Customization, and Extensions)  
-- 📁 **Spark:** Scalable Data Processing with PySpark and Pandas in a Google Collab environment
-- 📁 **Spatial_Series:** Spatial Dependence Analysis and Modeling (A Comparative Study of SAR and SEM Models)  
+- 📁 **Recommender_Systems:** Music Recommendation System using Collaborative Filtering
 - 📁 **SQL_and_MongoDB:** A Comparative Study of Relational and NoSQL Databases (SQL and MongoDB)  
+- 📁 **Shiny:** Shiny Web Application for Data Analysis  
+- 📁 **Spark:** Real Estate Price Prediction with PySpark and Pandas in a Google Collab environment
+- 📁 **Spatial_Series:** Spatial Dependence Analysis and Modeling (A Comparative Study of SAR and SEM Models)  
 - 📁 **Temporal_Series:** Time Series Analysis and Forecasting (Decomposition, Regression, and ARIMA Modeling)  
 - 📁 **Web_Scrapping:** Extracting and Analyzing E-Commerce Product Data  
 
