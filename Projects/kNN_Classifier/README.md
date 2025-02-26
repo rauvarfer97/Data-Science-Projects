@@ -34,14 +34,14 @@ The second model is a Random KNN regression using cross-validation. Key steps:
 ### 4. Comparison of Models:
 A comparative study of both models is performed based on their MSE. The Weighted KNN model yields a lower MSE (130.86) compared to the Random KNN model, which gives MSE values of 209.84 and 157.17 before and after feature selection, respectively.
 
-### **Requeriments**
+## **Requeriments**
 To run the R script and R Markdown file, make sure to install the necessary packages:
 
 ```
 install.packages(c("kknn", "caret", "rknn", "ggplot2"))
 ```
 
-### How to Reproduce the Analysis
+## How to Reproduce the Analysis
 
 1. Load the data by reading the khantrainadd2.csv file.
 2. Follow the steps in the Sknn_Varela_Ferrando.rmd file to process the data and fit the models.
