@@ -1,4 +1,4 @@
-# Complex Systems Simulation in NetLogo
+# NetLogo Simulations for Group Properties Evaluation
 
 ## Project Overview
 This project focuses on developing and analyzing **NetLogo** models to simulate a complex ecosystem. It extends the classic **Wolves Sheep Grass** model by introducing a new predator: **eagles**. Two versions of the model have been developed:
