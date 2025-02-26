@@ -3,10 +3,10 @@
 This directory contains files related to a project on KNN Regression conducted by Raúl Varela Ferrando. The work explores a regression model using the K-Nearest Neighbors (KNN) algorithm and includes data preparation, model fitting, and error analysis. The project uses the dataset khantrainadd2.csv and provides a comparative study between two KNN regression models: Weighted KNN and Random KNN. Below is an explanation of each file in the directory.
 
 ## Files in the Directory
-### 1. kNN_Class_Project.r:
+### 1. kNN_Class_Project.R:
    This is the R script that contains the code for the regression analysis. It includes steps for data loading, preprocessing, model training, and evaluation.
 
-### 2. kNN_Class_Project.rmd:
+### 2. kNN_Class_Project.Rmd:
    This R Markdown file contains both the code and detailed comments explaining the steps of the project. It combines R code chunks with narrative text to describe the methodology and results of the analysis.
 
 ### 3. khantrainadd2.csv:
