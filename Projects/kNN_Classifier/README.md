@@ -1,4 +1,5 @@
-# README - KNN Regression Project
+# Feature Selection and Predictive Modeling Using Weighted and Random kNN
+
 ## Overview
 This directory contains files related to a project on KNN Regression conducted by Raúl Varela Ferrando. The work explores a regression model using the K-Nearest Neighbors (KNN) algorithm and includes data preparation, model fitting, and error analysis. The project uses the dataset khantrainadd2.csv and provides a comparative study between two KNN regression models: Weighted KNN and Random KNN. Below is an explanation of each file in the directory.
 
